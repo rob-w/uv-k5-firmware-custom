@@ -49,7 +49,6 @@ const uint16_t RSSI_MAX_VALUE = 65535;
 static uint32_t initialFreq;
 static char String[32];
 
-bool isInitialized = false;
 bool isListening = true;
 bool monitorMode = false;
 bool redrawStatus = true;
@@ -356,12 +355,6 @@ static void TuneToPeak() {
   scanInfo.rssi = peak.rssi;
   scanInfo.i = peak.i;
   SetF(scanInfo.f);
-}
-
-static void DeInitSpectrum() {
-  SetF(initialFreq);
-  RestoreRegisters();
-  isInitialized = false;
 }
 
 uint8_t GetBWRegValueForScan() {
@@ -904,7 +897,7 @@ static void DrawArrow(uint8_t x) {
   }
 }
 
-static void OnKeyDown(uint8_t key) {
+static bool OnKeyDown(uint8_t key) {
   switch (key) {
   case KEY_3:
     UpdateDBMax(true);
@@ -977,17 +970,16 @@ static void OnKeyDown(uint8_t key) {
       menuState = 0;
       break;
     }
-    #ifdef ENABLE_FEAT_F4HWN_SPECTRUM
-      SaveSettings();
-    #endif
-    DeInitSpectrum();
+    /// straight to exit
+    return false;
     break;
   default:
     break;
   }
+  return true;
 }
 
-static void OnKeyDownFreqInput(uint8_t key) {
+static bool OnKeyDownFreqInput(uint8_t key) {
   switch (key) {
   case KEY_0:
   case KEY_1:
@@ -1025,9 +1017,10 @@ static void OnKeyDownFreqInput(uint8_t key) {
   default:
     break;
   }
+  return true;
 }
 
-void OnKeyDownStill(KEY_Code_t key) {
+static bool OnKeyDownStill(KEY_Code_t key) {
   switch (key) {
   case KEY_3:
     UpdateDBMax(true);
@@ -1096,6 +1089,7 @@ void OnKeyDownStill(KEY_Code_t key) {
   default:
     break;
   }
+  return true;
 }
 
 static void RenderFreqInput() { UI_PrintString(freqInputString, 2, 127, 0, 8); }
@@ -1193,7 +1187,8 @@ static void Render() {
   ST7565_BlitFullScreen();
 }
 
-bool HandleUserInput() {
+bool HandleUserInput(void)
+{
   kbd.prev = kbd.current;
   kbd.current = GetKey();
 
@@ -1210,14 +1205,16 @@ bool HandleUserInput() {
   if (kbd.counter == 3 || kbd.counter == 16) {
     switch (currentState) {
     case SPECTRUM:
-      OnKeyDown(kbd.current);
+      return(OnKeyDown(kbd.current));
       break;
     case FREQ_INPUT:
-      OnKeyDownFreqInput(kbd.current);
+      return(OnKeyDownFreqInput(kbd.current));
       break;
     case STILL:
-      OnKeyDownStill(kbd.current);
+      return(OnKeyDownStill(kbd.current));
       break;
+    default:/// undefined will dropout, treat like exit
+      return false;
     }
   }
 
@@ -1309,7 +1306,9 @@ static void UpdateListening() {
   ResetScanStats();
 }
 
-static void Tick() {
+static bool Tick(void)
+{
+
 #ifdef ENABLE_AM_FIX
   if (gNextTimeslice) {
     gNextTimeslice = false;
@@ -1331,7 +1330,7 @@ static void Tick() {
       if (IsPeakOverLevel()) {
         ToggleRX(true);
         TuneToPeak();
-        return;
+        return true;
       }
       redrawScreen = true;
       preventKeypress = false;
@@ -1340,8 +1339,18 @@ static void Tick() {
 #endif
 
   if (!preventKeypress) {
-    HandleUserInput();
+    /// this only on exit btt
+    if (!HandleUserInput()){
+#ifdef ENABLE_FEAT_F4HWN_SPECTRUM
+        SaveSettings();
+#endif
+
+	SetF(initialFreq);
+	RestoreRegisters();
+	return false;
+    }
   }
+
   if (newScanStart) {
     InitScan();
     newScanStart = false;
@@ -1364,6 +1373,7 @@ static void Tick() {
     Render();
     redrawScreen = false;
   }
+  return true;
 }
 
 void APP_RunSpectrum() {
@@ -1409,9 +1419,6 @@ void APP_RunSpectrum() {
 
   memset(rssiHistory, 0, sizeof(rssiHistory));
 
-  isInitialized = true;
-
-  while (isInitialized) {
-    Tick();
+  while (Tick()) {
   }
 }
