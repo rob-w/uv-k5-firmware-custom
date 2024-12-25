@@ -40,12 +40,12 @@ static void convertTime(uint8_t *line, uint8_t type)
     uint16_t t = (type == 0) ? (gTxTimerCountdown_500ms / 2) : (3600 - gRxTimerCountdown_500ms / 2);
 
     uint8_t m = t / 60;
-    uint8_t s = t % 60; // Utilisation de l'opérateur modulo pour simplifier le calcul des secondes
+    uint8_t s = t - (m * 60); // Replace modulo with subtraction for efficiency
 
     gStatusLine[0] = gStatusLine[7] = gStatusLine[14] = 0x00; // Quick fix on display (on scanning I, II, etc.)
 
-    char str[8];
-    sprintf(str, "%02d:%02d", m, s);
+    char str[6];
+    sprintf(str, "%02u:%02u", m, s);
     UI_PrintStringSmallBufferNormal(str, line);
 
     gUpdateStatus = true;
