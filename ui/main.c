@@ -928,8 +928,8 @@ void UI_DisplayMain(void)
 
                 // compander symbol
 #ifndef ENABLE_BIG_FREQ
-                if (att.compander)
-                    memcpy(p_line0 + 120 + LCD_WIDTH, BITMAP_compand, sizeof(BITMAP_compand));
+//                if (att.compander)
+//                    memcpy(p_line0 + 120 + LCD_WIDTH, BITMAP_compand, sizeof(BITMAP_compand));
 #else
                 // TODO:  // find somewhere else to put the symbol
 #endif

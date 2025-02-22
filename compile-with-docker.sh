@@ -68,19 +68,24 @@ basic() {
         ENABLE_VOX=0 \
         ENABLE_AIRCOPY=0 \
         ENABLE_AUDIO_BAR=0 \
-        ENABLE_FEAT_F4HWN_SPECTRUM=0 \
-        ENABLE_FEAT_F4HWN_PMR=1 \
-        ENABLE_FEAT_F4HWN_GMRS_FRS_MURS=1 \
+        ENABLE_BIG_FREQ=0 \
+        ENABLE_SMALL_BOLD=0 \
         ENABLE_NOAA=0 \
-        ENABLE_FEAT_F4HWN_RESUME_STATE=0 \
+        ENABLE_KEEP_MEM_NAME=0 \
+        ENABLE_NO_CODE_SCAN_TIMEOUT=0 \
+        ENABLE_FEAT_F4HWN_RX_TX_TIMER=0 \
+        ENABLE_FEAT_F4HWN_RESTORE_SCAN=0 \
         ENABLE_FEAT_F4HWN_CHARGING_C=0 \
         ENABLE_FEAT_F4HWN_INV=1 \
         ENABLE_FEAT_F4HWN_CTR=0 \
         ENABLE_FEAT_F4HWN_NARROWER=0 \
         ENABLE_FEAT_F4HWN_RESCUE_OPS=0 \
-        EDITION_STRING=Basic \
-        TARGET=f4hwn.basic \
-        && cp f4hwn.basic* compiled-firmware/"
+        ENABLE_FEAT_F4HWN_RX_TX_TIMER=0 \
+        ENABLE_FEAT_F4HWN_CONTRAST=0 \
+        ENABLE_FEAT_F4HWN_CA=0 \
+        EDITION_STRING=Voxless \
+        TARGET=f4hwn.voxless \
+        && cp f4hwn.voxless* compiled-firmware/"
 }
 
 rescueops() {
